@@ -1,0 +1,12 @@
+﻿기능,API Path,HTTP 메소드,분류
+로그인,/api/auth/login,POST,회원
+회원가입,/api/auth/register,POST,회원
+토큰 리프레시,/api/auth/refresh,POST,회원
+새로운 미션 가져오기,/api/missions?region={regionId},GET,미션
+나의 미션 가져오기,/api/missions/me?type={typeId},GET,미션
+특정 식당 리뷰 작성,/api/restaurants/{restaurantId}/reviews,POST,리뷰
+미션 수락하기,/api/missions/{missionId},POST,미션
+나의 정보 가져오기,/api/auth/me,GET,회원
+미션 완료 코드 가져오기,/api/missions/{missionId}/code,GET,미션
+(사장님용) 손님 미션 완료 처리,/api/missions,PATCH,미션
+자신의 잔여 포인트 조회,/api/rewards/me,GET,포인트
