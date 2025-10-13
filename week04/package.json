@@ -1,0 +1,15 @@
+{
+  "name": "umc-7th-node.js-first-run",
+  "version": "1.0.0",
+  "description": "UMC 7기 Node.js 파트 첫 시작 프로젝트",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "Subin Kim <sudosubin@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.0.0-0"
+  }
+}
