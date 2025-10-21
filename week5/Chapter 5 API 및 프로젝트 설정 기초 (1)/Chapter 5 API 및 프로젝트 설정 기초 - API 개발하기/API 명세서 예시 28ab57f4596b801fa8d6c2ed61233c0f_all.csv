@@ -1,0 +1,8 @@
+﻿이름,API Path,선택
+미션 목록 조회,/api/v1/missions,GET
+미션 성공 처리,/api/v1/missions/{missionId}/completed,PATCH
+홈 화면 조회,/api/v1/home,GET
+리뷰 작성,/api/v1/store/reviews,POST
+로그인,/api/v1/users/login,POST
+마이페이지,/api/v1/users/my,GET
+"회원가입 ",/api/v1/users/signup,POST
