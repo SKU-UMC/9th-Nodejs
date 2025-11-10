@@ -1,0 +1,281 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NONE 
+}
+
+enum Platform {
+  KAKAO
+  NAVER
+  APPLE
+  GOOGLE
+}
+model Address {
+  id        Int   @id @default(autoincrement())
+  sido      String @db.VarChar(20)
+  gu        String  @db.VarChar(10)
+  dong      String  @db.VarChar(10)
+  fullAddress String  @map("full_address") @db.Text
+  restaurant  Restaurant[]
+  user User[]
+  @@map("address")
+}
+
+model Photo {
+  id        Int   @id @default(autoincrement())
+  filename  String @db.VarChar(50)
+  createdAt DateTime @map("created_at") @default(now())
+  deletedAt DateTime? @map("deleted_at")
+  user User[]
+  reviewPhoto ReviewPhoto[]
+  contactPhoto ContactPhoto[]
+  @@map("photo")
+}
+
+model User {
+  id        Int   @id @default(autoincrement())
+  name      String  @db.VarChar(10)
+  email     String  @unique(map: "email") @db.VarChar(50)
+  phone     String  @unique(map: "phone") @db.VarChar(11)
+  gender    Gender
+  birth     DateTime
+  address   Address @relation(fields: [addressId], references: [id])
+  addressId Int @map("address_id")
+  detailAddress String @db.Text @map("detail_address")
+  platform  Platform?
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime? @map("created_at") @default(now())
+  photo     Photo?   @relation(fields: [profilePhotoId], references: [id])
+  profilePhotoId Int? @map("profile_photo_id")
+  password  String    @db.VarChar(300)
+
+  favoriteFood FavoriteFood[]
+  termsAgreement TermsAgreement[]
+  acceptedMission AcceptedMission[]
+  reward  Reward[]
+  rewardHistory RewardHistory[]
+  rewardWithdraw RewardWithdraw[]
+  acceptNotification AcceptNotification[]
+  receivedNotification ReceivedNotification[]
+  review Review[]
+  @@map("user")
+}
+
+model FoodType {
+  id        Int   @id @default(autoincrement())
+  typeName  String @db.VarChar(10) @map("type_name")
+  restaurantTypeName String @db.VarChar(10) @map("restaurant_type_name")
+
+  favoriteFood FavoriteFood[]
+  restaurant Restaurant[]
+  @@map("food_type")
+}
+model FavoriteFood {
+  id        Int   @id @default(autoincrement())
+  user      User  @relation(fields:[userId], references: [id])
+  userId    Int   @map("user_id")
+  foodType  FoodType @relation(fields: [foodTypeId], references: [id])
+  foodTypeId Int  @map("food_type_id")
+
+  @@map("favorite_food")
+}
+model Terms {
+  id        Int   @id @default(autoincrement())
+  required  Boolean
+  title     String  @db.VarChar(50)
+  content   String  @db.Text
+
+  termsAgreement TermsAgreement[]
+
+  @@map("terms")
+}
+model TermsAgreement {
+  id        Int   @id @default(autoincrement())
+  user      User  @relation(fields:[userId], references: [id])
+  userId    Int   @map("user_id")
+  terms     Terms @relation(fields:[termsId], references: [id])
+  termsId   Int   @map("terms_id")
+
+  @@map("terms_agreement")
+}
+model Restaurant {
+  id        Int   @id @default(autoincrement())
+  name      String @db.VarChar(50)
+  foodType  FoodType @relation(fields:[foodTypeId], references: [id])
+  foodTypeId  Int @map("food_type_id")
+  address   Address @relation(fields: [addressId], references: [id])
+  addressId   Int @map("address_id")
+  detailAddress String @db.Text @map("detail_address")
+  openTime    DateTime? @map("open_time")
+  closeTime   DateTime? @map("close_time")
+
+  mission Mission[]
+  review Review[]
+  @@map("restaurant")
+}
+model Mission {
+  id        Int   @id @default(autoincrement())
+  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId  Int @map("restaurant_id")
+  createdAt DateTime @map("created_at") @default(now())
+  endAt   DateTime  @map("end_at")
+  goal    Int
+  reward    Int 
+
+  acceptedMission AcceptedMission[]
+
+  @@map("mission")
+}
+
+model AcceptedMission {
+  id        Int   @id @default(autoincrement())
+  mission   Mission @relation(fields: [missionId], references: [id])
+  missionId Int @map("mission_id")
+  user    User  @relation(fields:[userId], references: [id])
+  userId    Int @map("user_id")
+  verificationCode  String @map("verfication_code") @db.VarChar(9)
+  acceptedAt    DateTime @map("accepted_at") @default(now())
+  completedAt   DateTime? @map("completed_at")
+  @@map("accepted_mission")
+}
+model Reward {
+  id        Int   @id @default(autoincrement())
+  user      User  @relation(fields: [userId], references: [id])
+  userId    Int   @map("user_id")
+  reward    Int    @default(0)
+  @@map("reward")
+}
+model RewardHistory {
+  id        Int   @id @default(autoincrement())
+  user      User  @relation(fields: [userId], references: [id])
+  userId    Int   @map("user_id")
+  title     String @db.VarChar(50)
+  description String? @db.VarChar(70)
+  occuredAt   DateTime @map("occured_at") @default(now())
+  @@map("reward_history")
+}
+model RewardWithdraw {
+  id        Int   @id @default(autoincrement())
+  user      User  @relation(fields: [userId], references: [id])
+  userId    Int   @map("user_id")
+  withdrawReward Int @map("withdraw_reward")
+  occuredAt   DateTime @map("occured_at") @default(now())
+  @@map("reward_withdraw")
+}
+model Review {
+  id        Int   @id @default(autoincrement())
+  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurantId  Int @map("restaurant_id")
+  user    User    @relation(fields:[userId], references: [id])
+  userId    Int @map("user_id")
+  score  Float
+  content String @db.Text
+  createdAt DateTime @map("created_at") @default(now())
+  deletedAt DateTime? @map("deleted_at")
+
+  reviewAnswer ReviewAnswer[]
+  reviewPhoto ReviewPhoto[]
+
+  @@map("review")
+}
+model ReviewAnswer {
+  id        Int   @id @default(autoincrement())
+  review    Review  @relation(fields: [reviewId], references: [id])
+  reviewId  Int   @map("review_id")
+  answer    String @db.Text
+  createdAt DateTime @map("created_at") @default(now())
+  @@map("review_answer")
+}
+model ReviewPhoto {
+  id        Int   @id @default(autoincrement())
+  review    Review @relation(fields: [reviewId], references: [id])
+  reviewId  Int   @map("review_id")
+  photo     Photo @relation(fields: [photoId], references: [id])
+  photoId   Int   @map("photo_id")
+  @@map("review_photo")
+}
+enum ContactType {
+  GENERAL
+  ACCOUNT
+  Reward
+  ETC
+}
+model Contact {
+  id        Int   @id @default(autoincrement())
+  title     String @db.VarChar(70)
+  content   String @db.Text
+  createdAt   DateTime @map("created_at") @default(now())
+  contactType ContactType @map("contact_type")
+
+  contactPhoto ContactPhoto[]
+  contactAnswer ContactAnswer[]
+
+  @@map("contact")
+}
+model ContactPhoto {
+  id        Int   @id @default(autoincrement())
+  contact   Contact @relation(fields: [contactId], references: [id])
+  contactId  Int  @map("contact_id")
+  photo   Photo   @relation(fields: [photoId], references: [id])
+  photoId   Int   @map("photo_id")
+
+  @@map("contact_photo")
+}
+model ContactAnswer {
+  id        Int   @id @default(autoincrement())
+  contact Contact @relation(fields: [contactId], references: [id])
+  contactId Int @map("contact_id")
+  answer    String @db.Text
+  createdAt   DateTime  @map("created_at") @default(now())
+
+  @@map("contact_answer")
+}
+enum AcceptNotificationType {
+  NEW_EVENT
+  REVIEW_ANSWER
+  CONTACT_ANSWER
+}
+
+model AcceptNotification {
+  id        Int   @id @default(autoincrement())
+  user      User  @relation(fields: [userId], references: [id])
+  userId    Int   @map("user_id")
+  type      AcceptNotificationType
+
+  @@map("accept_notification")
+}
+model Notification {
+  id        Int   @id @default(autoincrement())
+  title     String @db.VarChar(50)
+  content   String @db.Text
+  createdAt DateTime @map("created_at") @default(now())
+
+  receivedNotification ReceivedNotification[]
+
+  @@map("notification")
+}
+model ReceivedNotification {
+  id        Int   @id @default(autoincrement())
+  notification  Notification @relation(fields: [notificationId], references: [id])
+  notificationId  Int   @map("notification_id")
+  user    User  @relation(fields:[userId], references: [id])
+  userId    Int @map("user_id")
+  isRead    Boolean @map("is_read") @default(false)
+  @@map("received_notification")
+}
